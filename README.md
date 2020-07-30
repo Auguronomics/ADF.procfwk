@@ -12,21 +12,23 @@ This framework can also be used in any Azure Tenant and allow the creation of co
 
  ## Framework Features
 
-* Granular metadata control.
-* Metadata integrity checking.
-* Global properties.
-* Complete pipeline dependency chains.
-* Execution restart-ability.
-* Parallel execution.
-* Full execution and error logs.
-* Operational dashboards.
-* Low cost orchestration.
-* Disconnection between framework and Worker pipelines.
-* Cross Data Factory control flows.
-* Pipeline parameter support.
-* Simple troubleshooting.
-* Easy deployment.
-* Email alerting.
+ * Granular metadata control.
+ * Metadata integrity checking.
+ * Global properties.
+ * Complete pipeline dependency chains.
+ * Execution restart-ability.
+ * Parallel execution.
+ * Full execution and error logs.
+ * Operational dashboards.
+ * Low cost orchestration.
+ * Disconnection between framework and Worker pipelines.
+ * Cross Data Factory control flows.
+ * Pipeline parameter support.
+ * Simple troubleshooting.
+ * Easy deployment.
+ * Email alerting.
+ * Automated testing.
+ * Azure Key Vault integration.
 
 [ADFprocfwk.com](http://ADFprocfwk.com/)
 
@@ -37,6 +39,7 @@ This framework can also be used in any Azure Tenant and allow the creation of co
 |Paul Andrew |[@mrpaulandrew](https://twitter.com/mrpaulandrew)<br/>[mrpaulandrew.tech](https://mrpaulandrew.tech)|
 |Kamil Nowinski |[@NowinskiK](https://twitter.com/NowinskiK)<br/>[sqlplayer.net](https://sqlplayer.net)|
 |Richard Swinbank |[@RichardSwinbank](https://twitter.com/RichardSwinbank)<br/>[richardswinbank.net](https://richardswinbank.net/)|
+|Niall Langley |[@NiallLangley](https://twitter.com/NiallLangley)<br/>[github.com/NJLangley](https://github.com/NJLangley)|
 
 ## Issues
 
@@ -59,12 +62,15 @@ Go to... [Glossary](https://github.com/mrpaulandrew/ADF.procfwk/blob/master/Glos
 |:----:|:----:|:----:|
 | ![alt text](https://mrpaulandrew.files.wordpress.com/2018/11/github-icon.png?w=75 "GitHub Icon") | **GitHub** |**[github.com/mrpaulandrew/ADF.procfwk](https://github.com/mrpaulandrew/ADF.procfwk)**  |
 | ![alt text](https://mrpaulandrew.files.wordpress.com/2020/03/twitterlogo.png?w=75 "Twitter Icon") | **Twitter** |**[#ADFprocfwk](https://twitter.com/search?q=%23ADFprocfwk&amp;src=hashtag_click)** |
-| ![alt text](https://mrpaulandrew.files.wordpress.com/2020/06/youtube-icon.png?w=75 "YouTube Icon") | **Vlogs** |**[youtube.com/mrpaulandrew](https://www.youtube.com/channel/UCjs6VxzhgoQPLiZDNvaMkmw)** |
+| ![alt text](https://mrpaulandrew.files.wordpress.com/2020/06/youtube-icon.png?w=75 "YouTube Icon") | **Vlogs** |**[youtube.com/c/mrpaulandrew](https://www.youtube.com/c/mrpaulandrew)** |
 
 ## Release Details
 
-| Version | Overview | Related Blog(s) & Release Notes |
+| Version | Overview | Related Blog(s) & Version Details |
 |:----:|--------------|--------|
+| 1.8.4 |<u>Database Schema Reorganise and Restructuring</u> |[ADF.procfwk v1.8.4 - Database Schema Reorganise and Restructuring](https://mrpaulandrew.com/2020/07/23/adf-procfwk-v1-8-4-database-schema-reorganise-and-restructuring/) |
+| 1.8.3 |<u>Bug Fixes from the Community</u>, including:<ul><li>Email alerts sent to blank email addresses due to wrong flow in Child pipeline.</li><li>Worker pipelines cancelled during an execution fail when the framework is restarted due to missing Parent pipeline clean up condition.</li></ul> |Issues:</br>[ADF.procfwk #38](https://github.com/mrpaulandrew/ADF.procfwk/issues/38)<br/>[ADF.procfwk #37](https://github.com/mrpaulandrew/ADF.procfwk/issues/37) |
+| 1.8.2 |<u>Optionally Store SPN Details in Azure Key Vault</u> |[ADF.procfwk v1.8.2 - Optionally Store SPN Details in Azure Key Vault](https://mrpaulandrew.com/2020/07/22/adf-procfwk-v1-8-2-optionally-store-spn-details-in-azure-key-vault/) |
 | 1.8.1 |<u>Automated Framework Pipeline Testing</u> added, including tests for:<ul><li>A simple grandparent run.</li><li>All types of failure dependency handling.</li><li>Metadata checks when pipelines and staged are disabled.</li><li>No pipeline parameters provided.</li></ul> |Blog Series: <br/><ol><li>[Set up automated testing for Azure Data Factory](https://richardswinbank.net/adf/set_up_automated_testing_for_azure_data_factory)</li><li>[Automate integration tests in Azure Data Factory](https://richardswinbank.net/adf/automate_integration_tests_in_azure_data_factory)</li><li>[Isolated functional tests for Azure Data Factory](https://richardswinbank.net/adf/isolated_functional_tests_for_azure_data_factory)</li><li>[Testing Azure Data Factory in your CI/CD pipeline](https://richardswinbank.net/adf/testing_azure_data_factory_in_your_cicd_pipeline)</li><li>[Unit testing Azure Data Factory pipelines](https://richardswinbank.net/adf/unit_testing_azure_data_factory_pipelines)</li><li>[Calculating Azure Data Factory test coverage](https://richardswinbank.net/adf/calculating_azure_data_factory_test_coverage)</li></ol> |
 | 1.8.0 |<u>Complete Pipeline Dependency Chains For Failure Handling</u> added, plus:<ul><li>Clean up of a previous execution run if Workers appear as running.</li><li>New metadata integrity checks.</li><li>Internal get property value function added.</li></ul> |[ADF.procfwk v1.8 - Complete Pipeline Dependency Chains For Failure Handling](https://mrpaulandrew.com/2020/07/01/adf-procfwk-v1-8-complete-pipeline-dependency-chains-for-failure-handling/) |
 | 1.7.3 |Data Factory Deployment Updated To Use azure.datafactory.tools  PowerShell Module |[SQLPlayer/azure.datafactory.tools](https://github.com/SQLPlayer/azure.datafactory.tools) |

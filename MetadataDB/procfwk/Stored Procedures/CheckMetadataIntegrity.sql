@@ -23,6 +23,8 @@ BEGIN
 	Check 14 - Is there a current FailureHandling property available?
 	Check 15 - Does the FailureHandling property have a valid value?
 	Check 16 - When using DependencyChain failure handling, are there any dependants in the same execution stage of the predecessor?
+	Check 17 - Does the SPNHandlingMethod property have a valid value?
+	Check 18 - Does the Service Principal table contain both types of SPN handling for a single credential?
 	---------------------------------------------------------------------------------------------------------------------------------
 	Check A: - Are there any Running pipelines that need to be cleaned up?
 	*/
@@ -145,9 +147,7 @@ BEGIN
 		END;
 
 	--Check 8:
-	IF (
-		SELECT [PropertyValue] FROM [procfwk].[CurrentProperties] WHERE [PropertyName] = 'TenantId'
-		) = '1234-1234-1234-1234-1234'
+	IF ([procfwk].[GetPropertyValueInternal]('TenantId')) = '1234-1234-1234-1234-1234'
 		BEGIN
 			INSERT INTO @MetadataIntegrityIssues
 			VALUES
@@ -158,9 +158,7 @@ BEGIN
 		END;
 
 	--Check 9:
-	IF (
-		SELECT [PropertyValue] FROM [procfwk].[CurrentProperties] WHERE [PropertyName] = 'SubscriptionId'
-		) = '1234-1234-1234-1234-1234'
+	IF ([procfwk].[GetPropertyValueInternal]('SubscriptionId')) = '1234-1234-1234-1234-1234'
 		BEGIN
 			INSERT INTO @MetadataIntegrityIssues
 			VALUES
@@ -276,7 +274,7 @@ BEGIN
 		END;
 
 	--Check 16:
-	IF (SELECT [procfwk].[GetPropertyValueInternal]('FailureHandling')) = 'DependencyChain'
+	IF ([procfwk].[GetPropertyValueInternal]('FailureHandling')) = 'DependencyChain'
 	BEGIN
 		IF EXISTS
 		(
@@ -301,9 +299,55 @@ BEGIN
 		END;
 	END;
 
+	--Check 17:
+	IF NOT EXISTS
+		(
+		SELECT 
+			*
+		FROM
+			[procfwk].[CurrentProperties] 
+		WHERE 
+			[PropertyName] = 'SPNHandlingMethod' 
+			AND [PropertyValue] IN ('StoreInDatabase','StoreInKeyVault')
+		)
+		BEGIN
+			INSERT INTO @MetadataIntegrityIssues
+			VALUES
+				( 
+				17,
+				'The property SPNHandlingMethod does not have a supported value.'
+				)	
+		END;
+
+	--Check 18:
+	IF EXISTS
+		(
+		SELECT
+			*
+		FROM
+			[dbo].[ServicePrincipals]
+		WHERE
+			(
+			[PrincipalId] IS NOT NULL
+			OR [PrincipalSecret] IS NOT NULL
+			)
+			AND 
+			(
+			[PrincipalIdUrl] IS NOT NULL
+			OR [PrincipalSecretUrl] IS NOT NULL
+			)
+		)
+		BEGIN
+			INSERT INTO @MetadataIntegrityIssues
+			VALUES
+				( 
+				18,
+				'The table [dbo].[ServicePrincipals] can only have one method of SPN details sorted per credential ID.'
+				)	
+		END;
 
 	/*
-	Checks Outcome:
+	Integrity Checks Outcome:
 	*/
 	
 	--throw runtime error if checks fail
@@ -331,24 +375,20 @@ BEGIN
 		BEGIN
 			--return pipelines details that require a clean up
 			SELECT 
-				t.[PropertyValue] AS TenantId,
-				s.[PropertyValue] AS SubscriptionId,
-				ce.[ResourceGroupName],
-				ce.[DataFactoryName],
-				ce.[PipelineName],
-				ce.[AdfPipelineRunId],
-				ce.[LocalExecutionId],
-				ce.[StageId],
-				ce.[PipelineId]
+				[procfwk].[GetPropertyValueInternal]('TenantId') AS TenantId,
+				[procfwk].[GetPropertyValueInternal]('SubscriptionId') AS SubscriptionId,
+				[ResourceGroupName],
+				[DataFactoryName],
+				[PipelineName],
+				[AdfPipelineRunId],
+				[LocalExecutionId],
+				[StageId],
+				[PipelineId]
 			FROM 
-				[procfwk].[CurrentExecution] ce
-				INNER JOIN [procfwk].[CurrentProperties] t
-					ON t.[PropertyName] = 'TenantId'
-				INNER JOIN [procfwk].[CurrentProperties] s
-					ON s.[PropertyName] = 'SubscriptionId'
+				[procfwk].[CurrentExecution]
 			WHERE 
-				ce.[PipelineStatus] NOT IN ('Success','Failed','Blocked') 
-				AND ce.[AdfPipelineRunId] IS NOT NULL
+				[PipelineStatus] NOT IN ('Success','Failed','Blocked','Cancelled') 
+				AND [AdfPipelineRunId] IS NOT NULL
 		END;
 	ELSE
 		BEGIN
