@@ -64,9 +64,6 @@ namespace ADFprocfwk
             #endregion
 
             #region ResolveKeyVaultValues
-
-            log.LogInformation(RequestHelper.CheckGuid(applicationId).ToString());
-
             if (!RequestHelper.CheckGuid(applicationId) && RequestHelper.CheckUri(applicationId))
             {
                 log.LogInformation("Getting applicationId from Key Vault");
@@ -80,53 +77,51 @@ namespace ADFprocfwk
             }
             #endregion
 
-            #region GetPipelineStatus
-            //Create a data factory management client
-            log.LogInformation("Creating ADF connectivity client.");
-            
+            #region GetPipelineStatus  
             if (orchestratorType.ToUpper() == "ADF")
             {
-                using (var client = DataFactoryClient.CreateDataFactoryClient(tenantId, applicationId, authenticationKey, subscriptionId))
-                {
-                    log.LogInformation("Checking ADF pipeline status.");
+                log.LogInformation("Creating Data Factory client.");
+                using var client = DataFactoryClient.CreateDataFactoryClient(tenantId, applicationId, authenticationKey, subscriptionId);
+                
+                log.LogInformation("Checking ADF pipeline status.");
 
-                    //Get pipeline status with provided run id
-                    adf.PipelineRun pipelineRun;
-                    pipelineRun = client.PipelineRuns.Get(resourceGroup, orchestratorName, runId);
-                    
-                    log.LogInformation("ADF pipeline status: " + pipelineRun.Status);
+                //Get pipeline status with provided run id
+                adf.PipelineRun pipelineRun;
+                pipelineRun = client.PipelineRuns.Get(resourceGroup, orchestratorName, runId);
 
-                    //Final return detail
-                    requestOutputString = CreateOutputString(pipelineName, runId, SetSimpleStatus(pipelineRun.Status), pipelineRun.Status);
-                }
+                log.LogInformation("ADF pipeline status: " + pipelineRun.Status);
+
+                //Final return detail
+                requestOutputString = CreateOutputString(pipelineName, runId, SetSimpleStatus(pipelineRun.Status), pipelineRun.Status);
             }
             else if (orchestratorType.ToUpper() == "SYN")
             {
-                using (var client = SynapseClient.CreateSynapseClient(tenantId, applicationId, authenticationKey, subscriptionId))
-                {
-                    log.LogInformation("Checking SYN pipeline status.");
+                log.LogInformation("Creating Synapse client.");
+                using var client = SynapseClient.CreateSynapseClient(tenantId, applicationId, authenticationKey, subscriptionId);
+                
+                log.LogInformation("Checking SYN pipeline status.");
 
-                    //Get pipeline status with provided run id
-                    /*
-                    syn.PipelineRun pipelineRun;
-                    pipelineRun = client.PipelineRuns.Get(resourceGroup, orchestratorName, runId);
+                //Get pipeline status with provided run id
+                /*
+                syn.PipelineRun pipelineRun;
+                pipelineRun = client.PipelineRuns.Get(resourceGroup, orchestratorName, runId);
 
-                    log.LogInformation("ADF pipeline status: " + pipelineRun.Status);
+                log.LogInformation("ADF pipeline status: " + pipelineRun.Status);
 
-                    //Final return detail
-                    requestOutputString = CreateOutputString(pipelineName, pipelineRun.RunId, SetSimpleStatus(pipelineRun.Status), pipelineRun.Status);
-                    */
+                //Final return detail
+                requestOutputString = CreateOutputString(pipelineName, pipelineRun.RunId, SetSimpleStatus(pipelineRun.Status), pipelineRun.Status);
+                */
 
-                    requestOutputString = CreateOutputString(pipelineName, runId, SetSimpleStatus("Unknown"), "Unknown"); //done just just functions builds
-                }
+                requestOutputString = CreateOutputString(pipelineName, runId, SetSimpleStatus("Unknown"), "Unknown"); //done just just functions builds
             }
             else
             {
-                log.LogInformation("Invalid orchestrator type.");
+                log.LogError("Invalid orchestrator type.");
                 return new BadRequestObjectResult("Invalid orchestrator type provided. Expected ADF or SYN.");
             }
             #endregion
 
+            //Final function return
             JObject outputJson = JObject.Parse(requestOutputString);
 
             log.LogInformation("CheckPipelineStatus Function complete.");
